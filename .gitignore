@@ -1,0 +1,6 @@
+*.o
+*.d
+*.gcov
+*.a
+cpputest/CppUTest_tests
+kata/kata_tests

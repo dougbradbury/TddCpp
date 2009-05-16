@@ -24,7 +24,11 @@ CPPFLAGS =
 #to be included in main to force them to be linked in.  By convention
 #put them into an AllTests.h file in each directory
 SRC_DIRS = \
-	src/util
+	src/util \
+	src/01 \
+	src/02 \
+	src/03 \
+	
 
 #TEST_SRC_DIRS is a list of directories including 
 # - A test main (AllTests.cpp by convention)
@@ -33,13 +37,19 @@ SRC_DIRS = \
 # - 
 TEST_SRC_DIRS = \
 	tests \
-	tests/util
+	tests/util\
+	tests/01 \
+	tests/02 \
+	tests/03 \
 
 #includes for all compiles	
 INCLUDES =\
   -I.\
   -Iinclude/util\
-  -I$(CPPUTEST_HOME)/include/
+  -I$(CPPUTEST_HOME)/include/\
+  -Iinclude/01\
+  -Iinclude/02\
+  -Iinclude/03\
 
 #Flags to pass to ld
 LDFLAGS +=
