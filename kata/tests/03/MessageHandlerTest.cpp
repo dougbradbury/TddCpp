@@ -17,6 +17,6 @@ TEST_GROUP(MessageHandler)
 
 TEST(MessageHandler, Create)
 {
-  FAIL("Start here");
+  // FAIL("Start here");
 }
 

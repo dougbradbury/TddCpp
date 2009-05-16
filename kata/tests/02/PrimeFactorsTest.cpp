@@ -17,6 +17,6 @@ TEST_GROUP(PrimeFactors)
 
 TEST(PrimeFactors, Create)
 {
-  FAIL("Start here");
+  // FAIL("Start here");
 }
 
