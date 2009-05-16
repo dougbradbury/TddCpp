@@ -12,7 +12,7 @@ public:
   char * lastSentMessage;
   virtual void send(char * message)
   {
-    
+    lastSentMessage = message;
   }
   
 };
@@ -37,5 +37,17 @@ TEST(MessageHandler, shouldHandleEchoMessage)
 {
   messageHandler->receive("echo|hello");
   STRCMP_EQUAL("hello", mockComLink->lastSentMessage);
+}
+
+TEST(MessageHandler, shouldHandleADifferentEchoMessage)
+{
+  messageHandler->receive("echo|goodbye");
+  STRCMP_EQUAL("goodbye", mockComLink->lastSentMessage);  
+}
+
+TEST(MessageHandler, shouldHandleAnEmptyMessage)
+{
+  messageHandler->receive("");
+  POINTERS_EQUAL(0, mockComLink->lastSentMessage);
 }
 

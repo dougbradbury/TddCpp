@@ -16,7 +16,7 @@ class MessageHandler
     void receive(char * message);
 
   private:
-
+    ComLink * mComLink;
     MessageHandler(const MessageHandler&);
     MessageHandler& operator=(const MessageHandler&);
 
