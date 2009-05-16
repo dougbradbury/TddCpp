@@ -17,6 +17,6 @@ TEST_GROUP(Factorial)
 
 TEST(Factorial, Create)
 {
-  FAIL("Start here");
+  // FAIL("Start here");
 }
 

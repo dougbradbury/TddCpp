@@ -1,22 +1,41 @@
 #include "CppUTest/TestHarness.h"
 #include "MessageHandler.h"
+#include "ComLink.h"
+
+class MockComLink: public ComLink
+{
+public:
+  MockComLink() : lastSentMessage(0)
+  {
+  }
+  
+  char * lastSentMessage;
+  virtual void send(char * message)
+  {
+    
+  }
+  
+};
 
 TEST_GROUP(MessageHandler)
 {
   MessageHandler* messageHandler;
-
+  MockComLink* mockComLink;
   void setup()
   {
-    messageHandler = new MessageHandler();
+    mockComLink = new MockComLink();
+    messageHandler = new MessageHandler(mockComLink);
   }
   void teardown()
   {
     delete messageHandler;
+    delete mockComLink;
   }
 };
 
-TEST(MessageHandler, Create)
+TEST(MessageHandler, shouldHandleEchoMessage)
 {
-  // FAIL("Start here");
+  messageHandler->receive("echo|hello");
+  STRCMP_EQUAL("hello", mockComLink->lastSentMessage);
 }
 
