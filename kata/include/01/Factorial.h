@@ -12,7 +12,7 @@ class Factorial
   public:
     explicit Factorial();
     virtual ~Factorial();
-
+    int calculate(int);
   private:
 
     Factorial(const Factorial&);

@@ -25,9 +25,13 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "CppUTest/TestHarness.h"
 #include "CppUTest/Failure.h"
+#include "CppUTest/Utest.h"
 #include "CppUTest/TestOutput.h"
+
+#include <string.h>
+#include <stdio.h>
+
 
 Failure::Failure(Utest* test, const char* fileName, long lineNumber, const SimpleString& theMessage)
     : testName (test->getFormattedName())
@@ -83,21 +87,22 @@ SimpleString Failure::getMessage() const
 }
 
 EqualsFailure::EqualsFailure(Utest* test, const char* fileName, long lineNumber,
-              const SimpleString& expected,
-              const SimpleString& actual)
-   : Failure(test, fileName, lineNumber)
+                             const SimpleString& expected,
+                             const SimpleString& actual)
+    : Failure(test, fileName, lineNumber)
 {
+  const char *format = "expected <%s>\n\tbut was  <%s>";
 
-   const char* format = "expected <%s>\n\tbut was  <%s>";
-   message = StringFromFormat(format, expected.asCharString(), actual.asCharString());
-}
+  char *stage = new char [strlen(format) - (2 * strlen("%s"))
+                          + expected.size ()
+                          + actual.size ()
+                          + 1];
 
-ContainsFailure::ContainsFailure(Utest* test, const char* fileName, long lineNumber,
-              const SimpleString& expected,
-              const SimpleString& actual)
-   : Failure(test, fileName, lineNumber)
-{
+  sprintf(stage, format,
+          expected.asCharString(),
+          actual.asCharString());
 
-   const char* format = "actual <%s>\n\tdid not contain  <%s>";
-   message = StringFromFormat(format, actual.asCharString(), expected.asCharString());
+  message = SimpleString(stage);
+
+  delete [] stage;
 }

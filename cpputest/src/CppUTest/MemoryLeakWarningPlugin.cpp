@@ -27,164 +27,37 @@
 
 #include "CppUTest/TestHarness.h"
 #include "CppUTest/MemoryLeakWarningPlugin.h"
-#include "CppUTest/MemoryLeakDetector.h"
-#include "CppUTest/PlatformSpecificFunctions.h"
 
-class MemoryLeakWarningReporter : public MemoryLeakFailure
+
+MemoryLeakWarningPlugin::MemoryLeakWarningPlugin(const SimpleString& name)
+	: TestPlugin(name)
 {
-public:
-   virtual ~MemoryLeakWarningReporter() {};
-   virtual void fail(char* fail_string) {
-      FAIL(fail_string);
-   }
-};
-
-static MemoryLeakWarningReporter* globalReporter = 0;
-static MemoryLeakDetector* globalDetector = 0;
-
-void destroyDetector()
-{
-   PlatformSpecificFree (globalDetector);
-   globalReporter->~MemoryLeakWarningReporter();
-   PlatformSpecificFree (globalReporter);
-   globalReporter = 0;
-   globalDetector = 0;
-}
-
-
-
-MemoryLeakDetector* MemoryLeakWarningPlugin::getGlobalDetector()
-{
-   if (globalDetector == 0) {
-
-      /*  Want to void using operator new here, however.. still need to init the vtable.
-       *  Now just memcpy a local stack variable in the malloced memory. Ought to work everywhere :))
-       */
-      MemoryLeakWarningReporter reporter;
-      globalReporter = (MemoryLeakWarningReporter*) PlatformSpecificMalloc(sizeof(MemoryLeakWarningReporter));
-      PlatformSpecificMemCpy(globalReporter, &reporter, sizeof(MemoryLeakWarningReporter));
-
-      globalDetector = (MemoryLeakDetector*) PlatformSpecificMalloc(sizeof(MemoryLeakDetector));
-      if (globalDetector == 0)
-        FAIL("operator new(size, bool) not enough memory");
-      globalDetector->init(globalReporter);
-      PlatformSpecificAtExit(destroyDetector);
-   }
-   return globalDetector;
-}
-
-MemoryLeakWarningPlugin* MemoryLeakWarningPlugin::firstPlugin = 0;
-
-MemoryLeakWarningPlugin* MemoryLeakWarningPlugin::getFirstPlugin()
-{
-   return firstPlugin;
-}
-
-MemoryLeakDetector* MemoryLeakWarningPlugin::getMemoryLeakDetector()
-{
-   return memLeakDetector;
-}
-
-void MemoryLeakWarningPlugin::ignoreAllLeaksInTest()
-{
-   ignoreAllWarnings = true;
-}
-
-void MemoryLeakWarningPlugin::expectLeaksInTest(int n)
-{
-   expectedLeaks = n;
-}
-
-MemoryLeakWarningPlugin::MemoryLeakWarningPlugin(const SimpleString& name, MemoryLeakDetector* localDetector)
-	: TestPlugin(name), ignoreAllWarnings(false), expectedLeaks(0)
-{
-   disable();
-   if (firstPlugin == 0) firstPlugin = this;
-
-   if (localDetector) memLeakDetector = localDetector;
-   else memLeakDetector = getGlobalDetector();
 }
 
 MemoryLeakWarningPlugin::~MemoryLeakWarningPlugin()
 {
-   if (this == firstPlugin) firstPlugin = 0;
 }
 
 void MemoryLeakWarningPlugin::preTestAction(Utest& test, TestResult& result)
 {
-    if (!isEnabled())
-       return;
-  
-   memLeakDetector->startChecking();
-   failureCount = result.getFailureCount();
+	memLeakWarning.CheckPointUsage();
 }
 
 void MemoryLeakWarningPlugin::postTestAction(Utest& test, TestResult& result)
 {
-  if (!isEnabled())
-    return;
-  
-   memLeakDetector->stopChecking();
-   int leaks = memLeakDetector->totalMemoryLeaks(mem_leak_period_checking);
-
-   if (!ignoreAllWarnings && expectedLeaks != leaks && failureCount == result.getFailureCount()) {
-	    Failure f(&test, memLeakDetector->report(mem_leak_period_checking));
+	if (memLeakWarning.UsageIsNotBalanced()) {
+	    Failure f(&test, memLeakWarning.Message());
 	    result.addFailure(f);
-   }
-   memLeakDetector->markCheckingPeriodLeaksAsNonCheckingPeriod();
-   ignoreAllWarnings = false;
-   expectedLeaks = 0;
+	  }
+	  memLeakWarning.ExpectLeaks(0);
 }
 
 void MemoryLeakWarningPlugin::Enable()
 {
-#if UT_NEW_OVERRIDES_ENABLED
-   memLeakDetector->enable();
-#endif
+	memLeakWarning.Enable();
 }
 
 const char* MemoryLeakWarningPlugin::FinalReport(int toBeDeletedLeaks)
 {
-  if (!isEnabled())
-    return "";
-  
-   int leaks = memLeakDetector->totalMemoryLeaks(mem_leak_period_enabled);
-   if (leaks != toBeDeletedLeaks)
-      return memLeakDetector->report(mem_leak_period_enabled);
-   return "";
+	return memLeakWarning.FinalReport(toBeDeletedLeaks);
 }
-
-#if UT_NEW_OVERRIDES_ENABLED
-#undef new
-
-void* operator new(size_t size)
-{
-   return MemoryLeakWarningPlugin::getGlobalDetector()->allocOperatorNew(size);
-}
-
-void operator delete(void* mem)
-{
-   MemoryLeakWarningPlugin::getGlobalDetector()->freeOperatorDelete((char*)mem);
-}
-
-void* operator new[](size_t size)
-{
-   return MemoryLeakWarningPlugin::getGlobalDetector()->allocOperatorNewArray(size);
-}
-
-void operator delete[](void* mem)
-{
-   MemoryLeakWarningPlugin::getGlobalDetector()->freeOperatorDeleteArray((char*)mem);
-}
-
-void* operator new(size_t size, const char* file, int line)
-{
-   return MemoryLeakWarningPlugin::getGlobalDetector()->allocOperatorNew(size, (char*) file, line);
-}
-
-void* operator new [](size_t size, const char* file, int line)
-{
-   return MemoryLeakWarningPlugin::getGlobalDetector()->allocOperatorNewArray(size, (char*) file, line);
-}
-
-#endif

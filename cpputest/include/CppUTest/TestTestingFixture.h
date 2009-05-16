@@ -41,7 +41,7 @@ public:
   		registry->setCurrentRegistry(registry);
 		registry->addTest(genTest);
 	};
-
+	
 	virtual ~TestTestingFixture() {
 		registry->setCurrentRegistry(0);
   		delete registry;
@@ -54,18 +54,14 @@ public:
 		genTest->_testFunction = testFunction;
 	}
 
-   void setSetup(void (*setupFunction)()) {
-      genTest->setup_ = setupFunction;
-   }
-
-   void setTeardown(void (*teardownFunction)()) {
-      genTest->teardown_ = teardownFunction;
-   }
-
+	void setSetup(void (*setupFunction)()) {
+		genTest->setup_ = setupFunction;
+	}
+	
 	void runAllTests () {
 		registry->runAllTests(*result);
 	}
-
+	
 	int getFailureCount () {
 		return result->getFailureCount();
 	}

@@ -29,7 +29,7 @@
 #include "CppUTest/TestResult.h"
 #include "CppUTest/Failure.h"
 #include "CppUTest/TestOutput.h"
-#include "CppUTest/PlatformSpecificFunctions.h"
+#include <stdio.h>
 
 TestResult::TestResult (TestOutput& p)
     : output(p)
@@ -50,7 +50,7 @@ TestResult::TestResult (TestOutput& p)
 
 void TestResult::setProgressIndicator(const char* indicator)
 {
-    output.setProgressIndicator(indicator);
+    output.setProgressIndicator(indicator);    
 }
 
 TestResult::~TestResult()
@@ -74,11 +74,6 @@ void TestResult::currentTestStarted(Utest* test)
 	currentTestTimeStarted = GetPlatformSpecificTimeInMillis();
 }
 
-void TestResult::print (const char* text)
-{
-   output.print(text);
-}
-
 void TestResult::currentTestEnded(Utest* test)
 {
 	currentTestTotalExecutionTime = GetPlatformSpecificTimeInMillis() - currentTestTimeStarted;
@@ -90,6 +85,7 @@ void TestResult::addFailure (const Failure& failure)
 {
   output.print(failure);
   failureCount++;
+  PlatformSpecificExitCurrentTest();
 }
 
 void TestResult::countTest()
@@ -149,4 +145,4 @@ long TestResult::getCurrentGroupTotalExecutionTime() const
 {
 	return currentGroupTotalExecutionTime;
 }
-
+	

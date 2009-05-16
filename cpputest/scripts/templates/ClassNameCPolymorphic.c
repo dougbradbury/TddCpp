@@ -3,7 +3,7 @@
 #include <memory.h>
 
 //static local variables
-typedef struct ClassName
+typedef struct _ClassName
 {
     int placeHolderForHiddenStructElements;
 };

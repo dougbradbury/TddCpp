@@ -25,9 +25,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+
 #include "CppUTest/TestHarness.h"
-#include "CppUTest/TestRegistry.h"
-#include "CppUTest/PlatformSpecificFunctions.h"
+
+#include <string.h>
+#include <stdio.h>
 
 TestResult* Utest::testResult_ = 0;
 Utest* Utest::currentTest_ = 0;
@@ -67,19 +69,6 @@ Utest::Utest (const char* groupName,
 Utest::~Utest ()
 {}
 
-void Utest::runOneTestWithPlugins(TestPlugin* plugin, TestResult& result)
-{
-   executePlatformSpecificRunOneTest(plugin, result);
-}
-
-void Utest::runOneTest(TestPlugin* plugin, TestResult& result)
-{
-   plugin->runAllPreTestAction(*this, result) ;
-   run(result);
-   plugin->runAllPostTestAction(*this, result);
-}
-
-
 void Utest::run(TestResult& result)
 {
   //save test context, so that test class can be tested
@@ -89,21 +78,15 @@ void Utest::run(TestResult& result)
   result.countRun();
   testResult_ = &result;
   currentTest_ = this;
-
-  if (executePlatformSpecificSetup()) {
-     executePlatformSpecificTestBody();
-  }
-  executePlatformSpecificTeardown();
+  setup();
+  executePlatformSpecificTestBody();
+  teardown();
 
   //restore
   currentTest_ = savedTest;
   testResult_ = savedResult;
 }
 
-void Utest::exitCurrentTest()
-{
-   executePlatformSpecificExitCurrentTest();
-}
 
 Utest *Utest::getNext() const
   {
@@ -122,7 +105,7 @@ int Utest::countTests()
 	return next_->countTests() + 1;
 }
 
-bool Utest::isNull () const
+bool Utest::isLast () const
 {
 	return false;
 }
@@ -238,34 +221,12 @@ bool Utest::assertCstrEqual(const char* expected, const char* actual, const char
 		testResult_->addFailure (_f);
 		return false;
 	}
-	if (PlatformSpecificStrCmp(expected, actual) != 0) {
+	if (strcmp(expected, actual) != 0) {
 		EqualsFailure _f(this, fileName, lineNumber, StringFrom(expected), StringFrom(actual));
 		testResult_->addFailure (_f);
 		return false;
 	}
 	return true;
-}
-
-bool Utest::assertCstrContains(const char* expected, const char* actual, const char* fileName, int lineNumber)
-{
-   testResult_->countCheck();
-   if (actual == 0 && expected == 0) return true;
-   if (actual == 0) {
-      ContainsFailure _f(this, fileName, lineNumber, StringFrom(expected), StringFrom("(null)"));
-      testResult_->addFailure (_f);
-      return false;
-   }
-   if (expected == 0) {
-      ContainsFailure _f(this, fileName, lineNumber, StringFrom("(null)"), StringFrom(actual));
-      testResult_->addFailure (_f);
-      return false;
-   }
-   if (!SimpleString(actual).contains(expected)) {
-      ContainsFailure _f(this, fileName, lineNumber, StringFrom(expected), StringFrom(actual));
-      testResult_->addFailure (_f);
-      return false;
-   }
-   return true;
 }
 
 void PadStringsToSameLength(SimpleString& aDecimal, SimpleString& eDecimal, char padCharacter)
@@ -314,10 +275,12 @@ bool Utest::assertPointersEqual(void* expected, void* actual, const char* fileNa
   return true;
 }
 
+
+
 bool Utest::assertDoublesEqual(double expected, double actual, double threshold, const char* fileName, int lineNumber)
 {
   testResult_->countCheck();
-  if (PlatformSpecificFabs(expected-actual) > threshold)
+  if (fabs(expected-actual) > threshold)
     {
       EqualsFailure _f(this, fileName, lineNumber, StringFrom(expected), StringFrom(actual));
       testResult_->addFailure (_f);
@@ -332,21 +295,6 @@ void Utest::fail(const char *text, const char* fileName, int lineNumber)
   testResult_->addFailure (_f);
 }
 
-void Utest::print(const char *text, const char* fileName, int lineNumber)
-{
-   SimpleString stringToPrint = "\n";
-   stringToPrint += fileName;
-   stringToPrint += ":";
-   stringToPrint += StringFrom(lineNumber);
-   stringToPrint += " ";
-   stringToPrint += text;
-   testResult_->print(stringToPrint.asCharString());
-}
-
-void Utest::print(const SimpleString& text, const char* fileName, int lineNumber)
-{
-   print(text.asCharString(), fileName, lineNumber);
-}
 
 TestResult* Utest::getTestResult()
 {
@@ -384,7 +332,7 @@ Utest* NullTest::getNext() const
 	return &instance();
 }
 
-bool NullTest::isNull () const
+bool NullTest::isLast () const
 {
 	return true;
 }

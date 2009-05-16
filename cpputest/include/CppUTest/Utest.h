@@ -25,12 +25,20 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+///////////////////////////////////////////////////////////////////////////////
+//
+// TEST.H
+//
 // This file contains the Test class along with the macros which make effective
 // in the harness.
+//
+///////////////////////////////////////////////////////////////////////////////
 
 #ifndef D_UTest_h
 #define D_UTest_h
 
+
+#include <math.h>
 #include "SimpleString.h"
 
 /*! \brief UTest.h
@@ -43,7 +51,6 @@
  */
 
 class TestResult;
-class TestPlugin;
 
 class Utest
   {
@@ -59,12 +66,12 @@ class Utest
     virtual void testBody(){};
 
     virtual void run (TestResult& result);
-    virtual void runOneTestWithPlugins(TestPlugin* plugin, TestResult& result);
+    virtual void executePlatformSpecificTestBody();
     virtual SimpleString getFormattedName() const;
 
 	virtual Utest* addTest(Utest* test);
     virtual Utest *getNext () const;
-    virtual bool isNull () const;
+    virtual bool isLast () const;
     virtual int  countTests();
 
     bool shouldRun(const SimpleString& groupFilter, const SimpleString& nameFilter) const;
@@ -82,29 +89,16 @@ class Utest
 
     virtual bool assertTrue(bool condition, const char* conditionString, const char* fileName, int lineNumber);
     virtual bool assertCstrEqual(const char* expected, const char* actual, const char* fileName, int lineNumber);
-    virtual bool assertCstrContains(const char* expected, const char* actual, const char* fileName, int lineNumber);
     virtual bool assertLongsEqual(long expected, long actual, const char* fileName, int lineNumber);
     virtual bool assertPointersEqual(void* expected, void* actual, const char* fileName, int lineNumber);
     virtual bool assertDoublesEqual(double expected, double actual, double threshold, const char* fileName, int lineNumber);
     virtual void fail(const char* text, const char* fileName, int lineNumber);
-    virtual void print(const char* text, const char* fileName, int lineNumber);
-    virtual void print(const SimpleString& text, const char* fileName, int lineNumber);
 
 	void setFileName(const char* fileName);
 	void setLineNumber(int lineNumber);
 	void setGroupName(const char* groupName);
 	void setTestName(const char* testName);
-
-	void exitCurrentTest();
   protected:
-     virtual void runOneTest(TestPlugin* plugin, TestResult& result);
-
-     virtual void executePlatformSpecificRunOneTest(TestPlugin* plugin, TestResult& result);
-     virtual bool executePlatformSpecificSetup();
-     virtual void executePlatformSpecificTestBody();
-     virtual void executePlatformSpecificTeardown();
-     virtual void executePlatformSpecificExitCurrentTest();
-
 
 	Utest();
 
@@ -141,7 +135,7 @@ class NullTest : public Utest
 
 		virtual int  countTests();
 		virtual Utest*getNext () const;
-		virtual bool isNull () const;
+		virtual bool isLast () const;
   private:
 
     NullTest(const NullTest&);

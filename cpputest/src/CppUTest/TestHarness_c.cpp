@@ -32,17 +32,17 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 #include "CppUTest/TestHarness.h"
-#include "CppUTest/MemoryLeakDetector.h"
 
 extern "C" {
-	#undef __cplusplus
-	#include "CppUTest/TestHarness_c.h"
+	 
+	#include "stdlib.h"
+	#include "CppUTest/TestHarness_c.h"	
 
 	void  CHECK_EQUAL_C_INT_LOCATION(int expected, int actual, const char* fileName, int lineNumber)
 	{
 			CHECK_EQUAL_LOCATION((long)expected, (long)actual, fileName, lineNumber);
 	}
-
+	
 	void  CHECK_EQUAL_C_REAL_LOCATION(double expected, double actual, double threshold, const char* fileName, int lineNumber)
 	{
 		DOUBLES_EQUAL_LOCATION(expected, actual, threshold, fileName, lineNumber);
@@ -53,12 +53,12 @@ extern "C" {
 		CHECK_EQUAL_LOCATION(expected, actual, fileName, lineNumber);
 	}
 
-	void  CHECK_EQUAL_C_STRING_LOCATION(const char* expected, const char* actual, const char* fileName, int lineNumber)
+	void  CHECK_EQUAL_C_STRING_LOCATION(char* expected, char* actual, const char* fileName, int lineNumber)
 	{
 	    STRCMP_EQUAL_LOCATION(expected, actual, fileName, lineNumber);
 	}
 
-	void  FAIL_TEXT_C_LOCATION(const char* text, const char* fileName, int lineNumber)
+	void  FAIL_TEXT_C_LOCATION(char* text, const char* fileName, int lineNumber)
 	{
 		FAIL_LOCATION(text, fileName, lineNumber);
 	}
@@ -67,63 +67,33 @@ extern "C" {
 	{
 		FAIL_LOCATION("", fileName, lineNumber);
 	}
-
+	
 	void  CHECK_C_LOCATION(int condition, const char* conditionString, const char* fileName, int lineNumber)
 	{
-		CHECK_LOCATION(((condition) == 0 ? false : true), conditionString, fileName, lineNumber);
+		CHECK_LOCATION(((condition) == 0 ? false : true), conditionString, fileName, lineNumber);	
 	}
-
+	
+	
 	static int out_of_memory = 0;
     void cpputest_malloc_set_out_of_memory()
     {
         out_of_memory = 1;
     }
-
+    
     void cpputest_malloc_set_not_out_of_memory()
     {
         out_of_memory = 0;
     }
-
-    void* cpputest_malloc(size_t size)
-    {
-       return cpputest_malloc_location(size, "<unknown>", 0);
-    }
-
-    void* cpputest_calloc(size_t num, size_t size)
-    {
-       return cpputest_calloc_location(num, size, "<unknown>", 0);
-    }
-
-    void* cpputest_realloc(void* ptr, size_t size)
-    {
-       return cpputest_realloc_location(ptr, size, "<unknown>", 0);
-    }
-
-	void cpputest_free(void* buffer)
+    
+	char* cpputest_malloc(unsigned int size)
 	{
-		cpputest_free_location(buffer, "<unknown>", 0);
+	    if (out_of_memory)
+	        return 0;
+		return new char[size];
 	}
-
-	void* cpputest_malloc_location(size_t size, const char* file, int line)
-   {
-	   if (out_of_memory) return 0;
-
-	   return MemoryLeakWarningPlugin::getGlobalDetector()->allocMalloc(size, file, line);
-   }
-
-	void* cpputest_calloc_location(size_t num, size_t size,const char* file, int line)
+	
+	void cpputest_free(char* buffer)
 	{
-	   return cpputest_malloc_location(num*size, file, line);
+		delete[] buffer;
 	}
-
-	void* cpputest_realloc_location(void* memory, size_t size, const char* file, int line)
-	{
-     return MemoryLeakWarningPlugin::getGlobalDetector()->allocRealloc((char*)memory, size, file, line);
-	}
-
-   void cpputest_free_location(void* buffer, const char* file, int line)
-   {
-      MemoryLeakWarningPlugin::getGlobalDetector()->freeFree((char*) buffer, file, line);
-   }
-
 }

@@ -27,163 +27,64 @@
 
 #include "CppUTest/TestHarness.h"
 #include "CppUTest/TestOutput.h"
-#include "CppUTest/TestRegistry.h"
 #include "CppUTest/TestTestingFixture.h"
-
-static bool afterCheck;
 
 TEST_GROUP(Utest)
 {
 	TestTestingFixture* fixture;
-	void setup()
+	TEST_SETUP()
 	{
 		fixture = new TestTestingFixture();
-		afterCheck = false;
+	    UT_PTR_SET(PlatformSpecificExitCurrentTest, FakePlatformSpecificExitCurrentTest);
 	}
-	void teardown()
+	TEST_TEARDOWN()
 	{
   		delete fixture;
   	}
-
-	void testFailureWith(void (*method)())
-	{
-	   fixture->setTestFunction(method);
-	   fixture->runAllTests();
-	   LONGS_EQUAL(1, fixture->getFailureCount());
-	   CHECK(!afterCheck);
-	}
-
 };
-
-static void _passMethod()
-{
-   CHECK(true);
-   afterCheck = true;
-}
-
-static void _passPrint()
-{
-   UT_PRINT("Hello World!");
-}
-
-static void _passPrintF()
-{
-   UT_PRINT(StringFromFormat("Hello %s %d", "World!", 2009));
-}
 
 static void _failMethod()
 {
     FAIL("This test fails");
-    afterCheck = true;
-}
-
-static void _failMethodFAIL_TEST()
-{
-    FAIL_TEST("This test fails");
-    afterCheck = true;
-}
-
-static void _failMethodCHECK()
-{
-    CHECK(false);
-    afterCheck = true;
-}
-
-static void _failMethodCHECK_EQUAL()
-{
-    CHECK_EQUAL(1, 2);
-    afterCheck = true;
-}
-
-static void _failMethodSTRCMP_EQUAL()
-{
-    STRCMP_EQUAL("a", "b");
-    afterCheck = true;
-}
-
-static void _failMethodSTRCMP_CONTAINS()
-{
-    STRCMP_CONTAINS("hello", "world");
-    afterCheck = true;
-}
-
-static void _failMethodLONGS_EQUAL()
-{
-  LONGS_EQUAL(1, 0xff);
-  afterCheck = true;
-}
-static void _failMethodBYTES_EQUAL()
-{
-   BYTES_EQUAL('a', 'b');
-  afterCheck = true;
-}
-
-static void _failMethodPOINTERS_EQUAL()
-{
-  POINTERS_EQUAL((void*)0xa5a5, (void*)0xf0f0);
-  afterCheck = true;
-}
-
-static void _failMethodDOUBLES_EQUAL()
-{
-   DOUBLES_EQUAL(0.12, 44.1, 0.3);
-   afterCheck = true;
 }
 
 TEST(Utest, FailurePrintsSomething)
 {
-  testFailureWith(_failMethod);
-  fixture->assertPrintContains(__FILE__);
+  fixture->setTestFunction(_failMethod);
+  fixture->runAllTests();
+  LONGS_EQUAL(1, fixture->getFailureCount());
   fixture->assertPrintContains("This test fails");
 }
 
-TEST(Utest, FailureWithFailTest)
+static void _LongsEqualFailMethod()
 {
-   testFailureWith(_failMethodFAIL_TEST);
+  LONGS_EQUAL(1, 0xff);
 }
 
 TEST(Utest, FailurePrintHexOutputForLongInts)
 {
-  testFailureWith(_failMethodLONGS_EQUAL);
+  fixture->setTestFunction(_LongsEqualFailMethod);
+  fixture->runAllTests();
   fixture->assertPrintContains("expected <  1 0x01>");
   fixture->assertPrintContains("but was  <255 0xff>");
 }
 
+static void _PointersEqualFailMethod()
+{
+  POINTERS_EQUAL((void*)0xa5a5, (void*)0xf0f0);
+}
+
 TEST(Utest, FailurePrintHexOutputForPointers)
 {
-  testFailureWith(_failMethodPOINTERS_EQUAL);
+  fixture->setTestFunction(_PointersEqualFailMethod);
+  fixture->runAllTests();
   fixture->assertPrintContains("expected <0xa5a5>");
   fixture->assertPrintContains("but was  <0xf0f0>");
 }
 
-TEST(Utest, FailureWithDOUBLES_EQUAL)
+static void _passMethod()
 {
-   testFailureWith(_failMethodDOUBLES_EQUAL);
-}
-
-TEST(Utest, FailureWithCHECK)
-{
-   testFailureWith(_failMethodCHECK);
-}
-
-TEST(Utest, FailureWithCHECK_EQUAL)
-{
-   testFailureWith(_failMethodCHECK_EQUAL);
-}
-
-TEST(Utest, FailureWithSTRCMP_EQUAL)
-{
-   testFailureWith(_failMethodSTRCMP_EQUAL);
-}
-
-TEST(Utest, FailureWithSTRCMP_CONTAINS)
-{
-   testFailureWith(_failMethodSTRCMP_CONTAINS);
-}
-
-TEST(Utest, FailureWithBYTES_EQUAL)
-{
-   testFailureWith(_failMethodBYTES_EQUAL);
+	CHECK(true);
 }
 
 TEST(Utest, SuccessPrintsNothing)
@@ -192,24 +93,6 @@ TEST(Utest, SuccessPrintsNothing)
   fixture->runAllTests();
   LONGS_EQUAL(0, fixture->getFailureCount());
   fixture->assertPrintContains(".\nOK (1 tests");
-  CHECK(afterCheck);
-}
-
-TEST(Utest, PrintPrintsWhateverPrintPrints)
-{
-  fixture->setTestFunction(_passPrint);
-  fixture->runAllTests();
-  LONGS_EQUAL(0, fixture->getFailureCount());
-  fixture->assertPrintContains("Hello World!");
-  fixture->assertPrintContains(__FILE__);
-}
-
-TEST(Utest, PrintPrintsPrintf)
-{
-   fixture->setTestFunction(_passPrintF);
-   fixture->runAllTests();
-   LONGS_EQUAL(0, fixture->getFailureCount());
-   fixture->assertPrintContains("Hello World! 2009");
 }
 
 TEST(Utest, allMacros)
@@ -217,27 +100,11 @@ TEST(Utest, allMacros)
   CHECK(0 == 0);
   LONGS_EQUAL(1,1);
   BYTES_EQUAL(0xab,0xab);
+  CHECK_EQUAL("THIS", "THIS");
   CHECK_EQUAL(100,100);
   STRCMP_EQUAL("THIS", "THIS");
   DOUBLES_EQUAL(1.0, 1.0, .01);
   POINTERS_EQUAL(this, this);
-}
-
-static int functionThatReturnsAValue()
-{
-   CHECK(0 == 0);
-   LONGS_EQUAL(1,1);
-   BYTES_EQUAL(0xab,0xab);
-   CHECK_EQUAL(100,100);
-   STRCMP_EQUAL("THIS", "THIS");
-   DOUBLES_EQUAL(1.0, 1.0, .01);
-   POINTERS_EQUAL(0, 0);
-   return 0;
-}
-
-TEST(Utest, allMacrosFromFunctionThatReturnsAValue)
-{
-   functionThatReturnsAValue();
 }
 
 TEST(Utest, AssertsActLikeStatements)
@@ -256,12 +123,6 @@ TEST(Utest, AssertsActLikeStatements)
     STRCMP_EQUAL("", "")
     else
       STRCMP_EQUAL("", " ")
-
-  if (fixture != 0)
-    STRCMP_CONTAINS("con", "contains")
-  else
-    STRCMP_CONTAINS("hello", "world")
-
 
   if (fixture != 0)
     LONGS_EQUAL(1, 1)
@@ -302,8 +163,8 @@ IGNORE_TEST(Utest, IgnoreTestAccessingFixture)
 
 TEST(Utest, MacrosUsedInSetup)
 {
-   IGNORE_ALL_LEAKS_IN_TEST();
-   fixture->setSetup(_failMethod);
+	delete fixture->genTest;
+	fixture->genTest = new ExecFunctionTest(_failMethod);
  	fixture->setTestFunction(_passMethod);
  	fixture->runAllTests();
 	LONGS_EQUAL(1, fixture->getFailureCount());
@@ -311,58 +172,12 @@ TEST(Utest, MacrosUsedInSetup)
 
 TEST(Utest, MacrosUsedInTearDown)
 {
-   IGNORE_ALL_LEAKS_IN_TEST();
-   fixture->setTeardown(_failMethod);
-   fixture->setTestFunction(_passMethod);
-   fixture->runAllTests();
-   LONGS_EQUAL(1, fixture->getFailureCount());
+	delete fixture->genTest;
+	fixture->genTest = new ExecFunctionTest(0, _failMethod);
+ 	fixture->setTestFunction(_passMethod);
+ 	fixture->runAllTests();
+	LONGS_EQUAL(1, fixture->getFailureCount());
 }
-
-static int teardownCalled = 0;
-
-static void _teardownMethod()
-{
-   teardownCalled++;
-}
-
-TEST(Utest, TeardownCalledAfterTestFailure)
-{
-   IGNORE_ALL_LEAKS_IN_TEST();
-   fixture->setTeardown(_teardownMethod);
-   fixture->setTestFunction(_failMethod);
-   fixture->runAllTests();
-   LONGS_EQUAL(1, fixture->getFailureCount());
-   LONGS_EQUAL(1, teardownCalled);
-}
-
-static int stopAfterFailure = 0;
-static void _stopAfterFailureMethod()
-{
-   FAIL("fail");
-   stopAfterFailure++;
-}
-
-TEST(Utest, TestStopsAfterTestFailure)
-{
-   IGNORE_ALL_LEAKS_IN_TEST();
-   stopAfterFailure = 0;
-   fixture->setTestFunction(_stopAfterFailureMethod);
-   fixture->runAllTests();
-   LONGS_EQUAL(1, fixture->getFailureCount());
-   LONGS_EQUAL(0, stopAfterFailure);
-}
-
-TEST(Utest, TestStopsAfterSetupFailure)
-{
-   stopAfterFailure = 0;
-   fixture->setSetup(_stopAfterFailureMethod);
-   fixture->setTeardown(_stopAfterFailureMethod);
-   fixture->setTestFunction(_failMethod);
-   fixture->runAllTests();
-   LONGS_EQUAL(2, fixture->getFailureCount());
-   LONGS_EQUAL(0, stopAfterFailure);
-}
-
 
 TEST_BASE(MyOwnTest)
 {

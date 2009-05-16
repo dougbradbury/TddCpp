@@ -30,16 +30,14 @@
 
 #include "TestOutput.h"
 #include "SimpleString.h"
-
-struct JUnitTestOutputImpl;
-struct JUnitTestCaseResultNode;
+#include <stdio.h>
 
 class JUnitTestOutput : public TestOutput
 {
   public:
   	JUnitTestOutput();
   	virtual ~JUnitTestOutput();
-
+  	
 	virtual void printTestsStarted();
 	virtual void printTestsEnded(const TestResult& result);
 	virtual void printCurrentTestStarted(const Utest& test);
@@ -54,12 +52,35 @@ class JUnitTestOutput : public TestOutput
 	virtual void printTestRun(int number, int total);
 
 	virtual void flush();
-
+	
   protected:
+  
+  	struct JUnitTestCaseResultNode 
+  	{
+  		JUnitTestCaseResultNode() : execTime_(0), failure_(0), next_(0){};
+  		SimpleString name_;
+  		long execTime_;
+  		Failure* failure_;
+  		JUnitTestCaseResultNode* next_;
+  	};
 
-	JUnitTestOutputImpl* impl_;
+  	struct JUnitTestGroupResult
+  	{
+  		JUnitTestGroupResult () : testCount_(0), failureCount_(0), groupExecTime_(0), head_(0), tail_(0){};
+  		int testCount_;
+  		int failureCount_;
+  		long startTime_;
+  		long groupExecTime_;
+  		SimpleString group_;
+  		JUnitTestCaseResultNode* head_;
+  		JUnitTestCaseResultNode* tail_;
+  	};
+  	
+	JUnitTestGroupResult results_;
+  	FILE* file_;
+  	
   	void resetTestGroupResult();
-
+  	
 	virtual void openFileForWrite(const SimpleString& fileName);
 	virtual void writeTestGroupToFile();
 	virtual void writeToFile(const SimpleString& buffer);
@@ -72,8 +93,8 @@ class JUnitTestOutput : public TestOutput
 	virtual void writeTestCases();
 	virtual void writeFailure(JUnitTestCaseResultNode* node);
 	virtual void writeFileEnding();
-
-
+	
+	
 };
 
-#endif
+#endif 

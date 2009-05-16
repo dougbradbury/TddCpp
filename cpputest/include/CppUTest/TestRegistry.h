@@ -60,30 +60,27 @@ class TestRegistry
 		virtual TestPlugin* getFirstPlugin();
 		virtual TestPlugin* getPluginByName(const SimpleString& name);
 		virtual void removePluginByName(const SimpleString& name);
-
+		
 		SimpleString getGroupFilter();
 		SimpleString getNameFilter();
-
-		virtual Utest* getFirstTest();
-		virtual Utest* getLastTest();
-		virtual Utest* getTestWithNext(Utest* test);
-
+		
 		static TestRegistry*  getCurrentRegistry();
 		virtual void setCurrentRegistry(TestRegistry* registry);
-		void cleanup();
   private:
 
     bool testShouldRun(Utest* test, TestResult& result);
     bool endOfGroup(Utest* test);
+    virtual void runOneTest(Utest* test, TestResult& result);
+    virtual void platformSpecificRunOneTest(Utest* test, TestResult& result);
 
     Utest *			tests;
-    SimpleString* 	nameFilter_;
-    SimpleString* 	groupFilter_;
+    SimpleString 	nameFilter_;
+    SimpleString 	groupFilter_;
     TestPlugin* 	firstPlugin_;
     static TestRegistry* currentRegistry_;
 
   };
-
-
+  
+  
 
 #endif

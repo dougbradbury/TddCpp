@@ -29,7 +29,7 @@
 #ifndef D_UTestMacros_h
 #define D_UTestMacros_h
 
-  /*! \brief Define a group of tests
+  /*! \brief Define a goup of tests
    *
    * All tests in a TEST_GROUP share the same setup
    * and teardown.  setup is run before the opening
@@ -83,10 +83,12 @@
 //Check any boolean condition
 
 #define CHECK_LOCATION(condition, conditionString, file, line)\
-  {if (!Utest::getCurrent()->assertTrue(condition, conditionString, file, line)) Utest::getCurrent()->exitCurrentTest();}
+  {if (!Utest::getCurrent()->assertTrue(condition, conditionString, file, line)) return;}
 
 #define CHECK(condition)\
   CHECK_LOCATION(condition, #condition, __FILE__, __LINE__)
+
+
 
 //This check needs the operator!=(), and a StringFrom(YourType) function
 #define CHECK_EQUAL(expected,actual)\
@@ -95,12 +97,10 @@
 #define CHECK_EQUAL_LOCATION(expected,actual, file, line)\
   if ((expected) != (actual))\
   {\
-	 { \
-      Utest::getTestResult()->countCheck();\
-  	   EqualsFailure _f(Utest::getCurrent(), file, line, StringFrom(expected), StringFrom(actual)); \
-      Utest::getTestResult()->addFailure(_f);\
-    } \
-    Utest::getCurrent()->exitCurrentTest(); \
+	 Utest::getTestResult()->countCheck();\
+  	 EqualsFailure _f(Utest::getCurrent(), file, line, StringFrom(expected), StringFrom(actual)); \
+     Utest::getTestResult()->addFailure(_f);\
+     return;\
   }\
   else\
 	 Utest::getTestResult()->countCheck();
@@ -111,20 +111,14 @@
   STRCMP_EQUAL_LOCATION(expected, actual, __FILE__, __LINE__)
 
 #define STRCMP_EQUAL_LOCATION(expected,actual, file, line)\
-  {if (!Utest::getCurrent()->assertCstrEqual(expected, actual, file, line)) Utest::getCurrent()->exitCurrentTest();}
-
-#define STRCMP_CONTAINS(expected,actual)\
-  STRCMP_CONTAINS_LOCATION(expected, actual, __FILE__, __LINE__)
-
-#define STRCMP_CONTAINS_LOCATION(expected,actual, file, line)\
-  {if (!Utest::getCurrent()->assertCstrContains(expected, actual, file, line)) Utest::getCurrent()->exitCurrentTest();}
+  {if (!Utest::getCurrent()->assertCstrEqual(expected, actual, file, line)) return;}
 
 //Check two long integers for equality
 #define LONGS_EQUAL(expected,actual)\
   LONGS_EQUAL_LOCATION(expected,actual,__FILE__, __LINE__)
 
 #define LONGS_EQUAL_LOCATION(expected,actual,file,line)\
-  { if (!Utest::getCurrent()->assertLongsEqual(expected, actual,  file, line)) Utest::getCurrent()->exitCurrentTest(); }
+  { if (!Utest::getCurrent()->assertLongsEqual(expected, actual,  file, line)) return; }
 
 #define BYTES_EQUAL(expected, actual)\
     LONGS_EQUAL((expected) & 0xff,(actual) & 0xff)
@@ -133,14 +127,16 @@
     POINTERS_EQUAL_LOCATION((expected),(actual), __FILE__, __LINE__)
 
 #define POINTERS_EQUAL_LOCATION(expected,actual,file,line)\
-  { if (!Utest::getCurrent()->assertPointersEqual(expected, actual,  file, line)) Utest::getCurrent()->exitCurrentTest(); }
+  { if (!Utest::getCurrent()->assertPointersEqual(expected, actual,  file, line)) return; }
+
+
 
 //Check two doubles for equality within a tolerance threshold
 #define DOUBLES_EQUAL(expected,actual,threshold)\
   DOUBLES_EQUAL_LOCATION(expected,actual,threshold,__FILE__,__LINE__)
 
 #define DOUBLES_EQUAL_LOCATION(expected,actual,threshold,file,line)\
-  { if (!Utest::getCurrent()->assertDoublesEqual(expected, actual, threshold,  file, line)) Utest::getCurrent()->exitCurrentTest(); }
+  { if (!Utest::getCurrent()->assertDoublesEqual(expected, actual, threshold,  file, line)) return; }
 
 //Fail if you get to this macro
 //The macro FAIL may already be taken, so allow FAIL_TEST too
@@ -149,19 +145,14 @@
   FAIL_LOCATION(text, __FILE__,__LINE__)
 
 #define FAIL_LOCATION(text, file, line)\
-  { Utest::getCurrent()->fail(text,  file, line); Utest::getCurrent()->exitCurrentTest(); }
+  { Utest::getCurrent()->fail(text,  file, line); return; }
 #endif
 
-#define FAIL_TEST(text)\
+#define FAIL_TEST(text, file, line)\
   FAIL_TEST_LOCATION(text, __FILE__,__LINE__)
 
 #define FAIL_TEST_LOCATION(text, file,line)\
-  { Utest::getCurrent()->fail(text, file, line); Utest::getCurrent()->exitCurrentTest(); }
+  { Utest::getCurrent()->fail(text, file, line); return; }
 
-#define UT_PRINT_LOCATION(text, file, line) \
-   { Utest::getCurrent()->print(text, file, line); }
-
-#define UT_PRINT(text) \
-   UT_PRINT_LOCATION(text, __FILE__, __LINE__)
 
 #endif /*D_UTestMacros_h*/

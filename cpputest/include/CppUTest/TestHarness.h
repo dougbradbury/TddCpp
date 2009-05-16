@@ -25,34 +25,16 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+///////////////////////////////////////////////////////////////////////////////
+//
+// TESTHARNESS.H
+//
+// The primary include file for the framework.
+//
+///////////////////////////////////////////////////////////////////////////////
+
 #ifndef D_TestHarness_h
 #define D_TestHarness_h
-
-#ifndef UT_NEW_MACROS_ENABLED
-   #ifdef UT_NEW_MACROS_DISABLED
-      #define UT_NEW_MACROS_ENABLED 0
-   #else
-      #define UT_NEW_MACROS_ENABLED 1
-   #endif
-#endif
-
-#ifndef UT_NEW_OVERRIDES_ENABLED
-   #ifdef UT_NEW_OVERRIDES_DISABLED
-      #define UT_NEW_OVERRIDES_ENABLED 0
-      #undef UT_NEW_MACROS_ENABLED
-      #define UT_NEW_MACROS_ENABLED 0
-   #else
-      #define UT_NEW_OVERRIDES_ENABLED 1
-   #endif
-#endif
-
-#define UT_SIMPLESTRING_BUFFERING 0
-
-/* original value was 9973 which works will with large programs. Now set to smaller since it takes
- * a lot of memory in embedded apps. Change it if you experience the memory leak detector to be slow.
- */
-
-#define MEMORY_LEAK_HASH_TABLE_SIZE 73
 
 #include "Utest.h"
 #include "UtestMacros.h"
@@ -60,5 +42,22 @@
 #include "TestResult.h"
 #include "Failure.h"
 #include "TestPlugin.h"
-#include "MemoryLeakWarningPlugin.h"
+#include "TestRegistry.h"
+#include "MemoryLeakWarning.h"
+#include "TestPlugin.h"
+
+// Some platform specific methods
+long GetPlatformSpecificTimeInMillis();
+void SetPlatformSpecificTimeInMillisMethod(long (*platformSpecific) ());
+
+SimpleString GetPlatformSpecificTimeString();
+void SetPlatformSpecificTimeStringMethod(SimpleString (*platformMethod) ());
+
+extern void (*PlatformSpecificExitCurrentTest)();
+extern void FakePlatformSpecificExitCurrentTest();
+extern void PlatformSpecificExitCurrentTestImpl();
+
+int PlatformSpecificSprintf(char *str, unsigned int size, const char *format, ...);
+
 #endif
+

@@ -11,7 +11,7 @@ TEST_TARGET = \
 
 #--- Inputs ----#
 PROJECT_HOME_DIR = .
-CPPUTEST_HOME = ../../CppUTest
+CPPUTEST_HOME = ../cpputest
 CPP_PLATFORM = Gcc
 
 #CFLAGS are set to override malloc and free to get memory leak detection in C programs

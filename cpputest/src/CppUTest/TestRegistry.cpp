@@ -25,28 +25,19 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+
 #include "CppUTest/TestHarness.h"
-#include "CppUTest/TestRegistry.h"
 
 TestRegistry::TestRegistry()
     : tests(&NullTest::instance())
-    , nameFilter_(0)
-    , groupFilter_(0)
+    , nameFilter_("")
+    , groupFilter_("")
     , firstPlugin_ (NullTestPlugin::instance())
 {
 }
 
 TestRegistry::~TestRegistry()
 {
-	cleanup();
-}
-
-void TestRegistry::cleanup()
-{
-	delete nameFilter_;
-	delete groupFilter_;
-	nameFilter_ = 0;
-	groupFilter_ = 0;
 }
 
 void TestRegistry::addTest (Utest *test)
@@ -59,7 +50,7 @@ void TestRegistry::runAllTests (TestResult& result)
 	bool groupStart = true;
 
 	result.testsStarted ();
-	for (Utest *test = tests; !test->isNull(); test = test->getNext ()){
+	for (Utest *test = tests; !test->isLast(); test = test->getNext ()){
 
 		if (groupStart) {
 			result.currentGroupStarted(test);
@@ -70,10 +61,10 @@ void TestRegistry::runAllTests (TestResult& result)
 		result.countTest();
 		if (testShouldRun(test, result)) {
 			result.currentTestStarted(test);
-			test->runOneTestWithPlugins(firstPlugin_, result);
+			platformSpecificRunOneTest(test, result);
 			result.currentTestEnded(test);
 		}
-
+		
 		if (endOfGroup (test)) {
 			groupStart = true;
 			result.currentGroupEnded(test);
@@ -82,9 +73,19 @@ void TestRegistry::runAllTests (TestResult& result)
   result.testsEnded ();
 }
 
+void TestRegistry::runOneTest(Utest* test, TestResult& result)
+{
+        firstPlugin_->runAllPreTestAction(*test, result) ;
+        test->run(result);
+        firstPlugin_->runAllPostTestAction(*test, result);
+}
+
+
 bool TestRegistry::endOfGroup(Utest* test)
 {
-	return (test->isNull() || test->getGroup() != test->getNext()->getGroup());
+	if (test->isLast() || test->getGroup() != test->getNext()->getGroup())
+		return true;
+	return false;
 }
 
 
@@ -94,7 +95,7 @@ int  TestRegistry::countTests()
 }
 
 TestRegistry* TestRegistry::currentRegistry_ = 0;
-
+	
 TestRegistry* TestRegistry::getCurrentRegistry()
 {
 	static TestRegistry registry;
@@ -114,31 +115,28 @@ void TestRegistry::unDoLastAddTest()
 
 void TestRegistry::nameFilter(SimpleString f)
 {
-	delete nameFilter_;
-	nameFilter_ = new SimpleString(f);
+	nameFilter_ = f;
 }
 
 void TestRegistry::groupFilter(SimpleString f)
 {
-	delete groupFilter_;
-	groupFilter_ = new SimpleString(f);
+  groupFilter_ = f;
 }
 
 SimpleString TestRegistry::getGroupFilter()
 {
-	return *groupFilter_;
+	return groupFilter_;
 }
 
 SimpleString TestRegistry::getNameFilter()
 {
-	return *nameFilter_;
+	return nameFilter_;
 }
 
 bool TestRegistry::testShouldRun(Utest* test, TestResult& result)
 {
-	  if (groupFilter_ == 0) groupFilter_ = new SimpleString();
-	  if (nameFilter_ == 0) nameFilter_ = new SimpleString();
-  if (test->shouldRun(*groupFilter_, *nameFilter_) )
+
+  if (test->shouldRun(groupFilter_, nameFilter_) )
     return true;
   else {
       result.countFilteredOut();
@@ -172,25 +170,4 @@ void TestRegistry::removePluginByName(const SimpleString& name)
 		firstPlugin_ = firstPlugin_->getNext();
 	if (firstPlugin_->getName() == name) firstPlugin_ = firstPlugin_->getNext();
 	firstPlugin_->removePluginByName(name);
-}
-
-Utest* TestRegistry::getFirstTest()
-{
-   return tests;
-}
-
-Utest* TestRegistry::getLastTest()
-{
-   Utest* current = tests;
-   while (!current->getNext()->isNull())
-      current = current->getNext();
-   return current;
-}
-
-Utest* TestRegistry::getTestWithNext(Utest* test)
-{
-   Utest* current = tests;
-   while (!current->getNext()->isNull() && current->getNext() != test)
-      current = current->getNext();
-   return current;
 }

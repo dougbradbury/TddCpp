@@ -27,4 +27,3 @@
 
 //Include this in the test main to execute these tests
 IMPORT_TEST_GROUP(SimpleStringExtensions);
-IMPORT_TEST_GROUP(TestOrderedTest);
