@@ -2,5 +2,12 @@
 *.d
 *.gcov
 *.a
+*.gcda
+*.gcno
 cpputest/CppUTest_tests
 kata/kata_tests
+kata/gcov_error.txt
+kata/gcov_output.txt
+kata/gcov_report.txt
+kata/gcov_report.txt.html
+kata/kata_tests.txt
