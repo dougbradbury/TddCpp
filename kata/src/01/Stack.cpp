@@ -9,7 +9,6 @@ count(0)
 Stack::~Stack()
 {
   delete[] data;
-  data[0] = 0xFF;
 }
 
 bool Stack::isEmpty() const
