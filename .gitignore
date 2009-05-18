@@ -11,3 +11,5 @@ kata/gcov_output.txt
 kata/gcov_report.txt
 kata/gcov_report.txt.html
 kata/kata_tests.txt
+kata_solutions/kata_tests
+kata_solutions/gcov_report.txt.html
