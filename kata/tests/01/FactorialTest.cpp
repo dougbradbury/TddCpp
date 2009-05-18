@@ -15,27 +15,6 @@ TEST_GROUP(Factorial)
   }
 };
 
-TEST(Factorial, ShouldFactor1)
+TEST(Factorial, firstTest)
 {
-  LONGS_EQUAL(1, factorial->calculate(1));
-}
-
-TEST(Factorial, ShouldFactor2)
-{
-  LONGS_EQUAL(2, factorial->calculate(2));
-}
-
-TEST(Factorial, ShouldFactor3)
-{
-  LONGS_EQUAL(6, factorial->calculate(3))
-}
-
-TEST(Factorial, ShouldFactor4)
-{
-  LONGS_EQUAL(24, factorial->calculate(4))
-}
-
-TEST(Factorial, ShouldFactor0)
-{
-  LONGS_EQUAL(1, factorial->calculate(0))
 }

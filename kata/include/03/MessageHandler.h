@@ -6,17 +6,12 @@
 //  MessageHandler is responsible for ...
 //
 ///////////////////////////////////////////////////////////////////////////////
-#include "ComLink.h"
-
 class MessageHandler
   {
   public:
-    explicit MessageHandler(ComLink* comlink);
+    explicit MessageHandler();
     virtual ~MessageHandler();
-    void receive(char * message);
-
   private:
-    ComLink * mComLink;
     MessageHandler(const MessageHandler&);
     MessageHandler& operator=(const MessageHandler&);
 

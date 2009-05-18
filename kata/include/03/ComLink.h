@@ -2,10 +2,9 @@
 #define ComLink_H
 class ComLink
 {
-public:
-  ComLink(){};
-  virtual ~ComLink(){};
-  virtual void send(char * message) = 0;
+  public:
+    ComLink(){};
+    virtual ~ComLink(){};
 };
 
 #endif
