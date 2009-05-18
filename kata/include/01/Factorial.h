@@ -6,6 +6,7 @@ class Factorial
   public:
     explicit Factorial();
     virtual ~Factorial();
+    
   private:
 
     Factorial(const Factorial&);

@@ -4,11 +4,11 @@
 class Stack
   {
   public:
-    explicit Stack(int capacity=32);
+    explicit Stack();
     virtual ~Stack();
-    
+
   private:
-    
+
     Stack(const Stack&);
     Stack& operator=(const Stack&);
 
