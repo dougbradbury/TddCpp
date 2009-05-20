@@ -1,22 +1,19 @@
 #ifndef D_MessageHandler_H
 #define D_MessageHandler_H
 
-///////////////////////////////////////////////////////////////////////////////
-//
-//  MessageHandler is responsible for ...
-//
-///////////////////////////////////////////////////////////////////////////////
-#include "ComLink.h"
+class Database;
+class ComLink;
 
 class MessageHandler
   {
   public:
-    explicit MessageHandler(ComLink* comlink);
+    explicit MessageHandler(ComLink* comLink, Database * database);
     virtual ~MessageHandler();
-    void receive(char * message);
-
+    void receive(char *);
   private:
-    ComLink * mComLink;
+    ComLink * comLink;
+    Database * database;
+    char * return_message;
     MessageHandler(const MessageHandler&);
     MessageHandler& operator=(const MessageHandler&);
 

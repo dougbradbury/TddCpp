@@ -1,53 +1,66 @@
 #include "CppUTest/TestHarness.h"
 #include "MessageHandler.h"
 #include "ComLink.h"
+#include "database.h"
 
-class MockComLink: public ComLink
+class MockComLink : public ComLink
+{
+  public:
+    MockComLink() : lastSentMessage(""){};
+    virtual ~MockComLink(){};
+    virtual void send(char * message)
+    {
+      lastSentMessage = message;
+    }
+    char * lastSentMessage;
+};
+
+class MockDatabase : public Database
 {
 public:
-  MockComLink() : lastSentMessage(0)
-  {
-  }
+  MockDatabase(){};
+  virtual ~MockDatabase(){};
   
-  char * lastSentMessage;
-  virtual void send(char * message)
-  {
-    lastSentMessage = message;
+  virtual float getCurrentBalance(){
+    return currentBalance;
   }
-  
+  float currentBalance;
 };
 
 TEST_GROUP(MessageHandler)
 {
   MessageHandler* messageHandler;
-  MockComLink* mockComLink;
+  MockComLink * mockComLink;
+  MockDatabase * mockDatabase;
   void setup()
   {
     mockComLink = new MockComLink();
-    messageHandler = new MessageHandler(mockComLink);
+    mockDatabase = new MockDatabase();
+    messageHandler = new MessageHandler(mockComLink, mockDatabase);
   }
   void teardown()
   {
     delete messageHandler;
     delete mockComLink;
+    delete mockDatabase;
   }
 };
 
 TEST(MessageHandler, shouldHandleEchoMessage)
 {
-  messageHandler->receive("echo|hello");
-  STRCMP_EQUAL("hello", mockComLink->lastSentMessage);
+  messageHandler->receive("echo hello");
+  STRCMP_EQUAL("hello", mockComLink->lastSentMessage)
 }
 
-TEST(MessageHandler, shouldHandleADifferentEchoMessage)
+TEST(MessageHandler, shouldHandleAnotherEchoMessage)
 {
-  messageHandler->receive("echo|goodbye");
-  STRCMP_EQUAL("goodbye", mockComLink->lastSentMessage);  
+  messageHandler->receive("echo how are you?");
+  STRCMP_EQUAL("how are you?", mockComLink->lastSentMessage)  ;
 }
 
-TEST(MessageHandler, shouldHandleAnEmptyMessage)
+TEST(MessageHandler, shouldGetStoredValue)
 {
-  messageHandler->receive("");
-  POINTERS_EQUAL(0, mockComLink->lastSentMessage);
+  mockDatabase->currentBalance = 12.53f;
+  messageHandler-> receive("get currentBalance");
+  STRCMP_EQUAL("$12.53", mockComLink->lastSentMessage);
 }
-
