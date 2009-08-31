@@ -1,0 +1,13 @@
+#ifndef D_PrimeFactors_H
+#define D_PrimeFactors_H
+
+///////////////////////////////////////////////////////////////////////////////
+//
+//  PrimeFactors is responsible for ...
+//
+///////////////////////////////////////////////////////////////////////////////
+void PrimeFactors_Create(void);
+void PrimeFactors_Destroy(void);
+int PrimeFactors_of(int, int*);
+
+#endif  // D_PrimeFactors_H

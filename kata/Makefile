@@ -25,9 +25,7 @@ GCOVFLAGS = -fprofile-arcs -ftest-coverage
 #put them into an AllTests.h file in each directory
 SRC_DIRS = \
 	src/util \
-	src/01 \
-	src/02 \
-	src/03 \
+	src/inC \
 	
 
 #TEST_SRC_DIRS is a list of directories including 
@@ -38,18 +36,14 @@ SRC_DIRS = \
 TEST_SRC_DIRS = \
 	tests \
 	tests/util\
-	tests/01 \
-	tests/02 \
-	tests/03 \
+	tests/inC \
 
 #includes for all compiles	
 INCLUDES =\
   -I.\
   -Iinclude/util\
   -I$(CPPUTEST_HOME)/include/\
-  -Iinclude/01\
-  -Iinclude/02\
-  -Iinclude/03\
+	-Iinclude/inC\
 
 #Flags to pass to ld
 LDFLAGS +=

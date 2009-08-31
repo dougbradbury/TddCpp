@@ -15,11 +15,11 @@ TEST_GROUP(Stack)
   }
 };
 
-TEST(Stack, BeginHere)
-{
-  FAIL("Delete this test and begin here.")
-}
-
+// TEST(Stack, BeginHere)
+// {
+//   FAIL("Delete this test and begin here.")
+// }
+// 
 // TEST(Stack, shouldStartEmpty)
 // {
 //   CHECK(stack->isEmpty());
