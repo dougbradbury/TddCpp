@@ -5,8 +5,7 @@
 //static local variables
 struct Stack
 {
-	int count;
-	int data[10];
+	int placeholder;
 };
 
 Stack* Stack_Create(void)
@@ -19,25 +18,4 @@ Stack* Stack_Create(void)
 void Stack_Destroy(Stack* self)
 {
     free(self);
-}
-
-int Stack_isEmpty(Stack* self)
-{
-	return self->count == 0;
-}
-
-void Stack_push(Stack* self, int i)
-{
-	self->data[self->count] = i;
-	self->count++;
-}
-
-void Stack_pop(Stack* self)
-{
-	self->count--;
-}
-
-int Stack_top(Stack* self)
-{
-	return self->data[self->count - 1];
 }
