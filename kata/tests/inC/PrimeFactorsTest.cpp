@@ -11,7 +11,6 @@ TEST_GROUP(PrimeFactors)
 {
 	void setup()
 	{		
-		memset(result, 0, sizeof(result));
 		PrimeFactors_Create();
 	}
 
