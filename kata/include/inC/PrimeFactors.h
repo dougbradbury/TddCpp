@@ -8,6 +8,5 @@
 ///////////////////////////////////////////////////////////////////////////////
 void PrimeFactors_Create(void);
 void PrimeFactors_Destroy(void);
-int PrimeFactors_of(int, int*);
 
 #endif  // D_PrimeFactors_H
